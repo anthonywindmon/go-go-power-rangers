@@ -13,6 +13,7 @@ from sklearn.metrics import classification_report
 import matplotlib.pyplot as plt
 import seaborn as sn
 import collections
+from imblearn.over_sampling import RandomOverSampler
 
 #models
 from sklearn.tree import DecisionTreeClassifier
@@ -280,3 +281,63 @@ print("Avg. Accuracy (of 10-FCV) = %0.2f (+/- %0.2f)"% (cv_scores.mean(), cv_sco
 classifier_report_NB = classification_report(y_test,y_predicted)
 print(classifier_report_NB)
 
+print('\n-------------------------------RANDOM OVERSAMPLING--------------------')
+
+#Due to imbalance in data, I decided to implement a ROS technique. This will give us more accurate results
+random_os = RandomOverSampler(random_state=12)
+X_train_ros, y_train_ros = random_os.fit_resample(X_train, y_train)
+X_train_ros, X_val_ros, y_train_ros, y_val_ros = train_test_split(filled_transaction_df.drop(columns=['isFraud']), target, test_size=0.10,
+                                                        random_state=1)
+#X_test_ros, y_test_ros = random_os.fit_sample(X_test, y_test)
+print('\nMODEL INFORMATION:')
+print("The length of the training set (After ROS) =", len(X_train_ros)) #training sample
+print("The length of the testing set =", len(X_test)) #testing sample
+print("The length of the validation set =", len(X_val_ros)) #validation sample
+
+#Printing overall sample size of the data after applying ROS
+sample_size_ros = len(X_train_ros) + len(X_test) + len(X_val_ros)
+print('Total Sample Size (After ROS) = ', sample_size_ros)
+
+print('\nModel is being trained on oversampled data...')
+print('\n---------------------------RANDOM FOREST (ROS)----------------------------')
+
+model_ros = RandomForestClassifier(n_estimators=150,random_state=0, max_depth=15,min_samples_leaf=2,
+                                min_samples_split=4)
+model_ros.fit(X_train_ros, y_train_ros)
+results_ros = model_ros.score(X_test, y_test)
+print("\nRandom Forests Accuracy (After ROS) = %0.2f"% (results_ros*100))
+
+#Confusion Matrix
+confuse_matrix_rf_ros = confusion_matrix(y_test, y_predicted)
+print("Random Forests Confusion Matrix: \n", confuse_matrix_rf_ros)
+
+#training model accuracy
+training_accuarcy = accuracy_score(y_train_ros, model_ros.predict(X_train_ros))
+print('Training Accuracy = %0.2f'% (training_accuarcy*100))
+#testing model accuracy
+testing_accuracy = accuracy_score(y_test,model_ros.predict(X_test))
+print('Testing Accuracy = %0.2f'% (testing_accuracy*100))
+#validation model accuracy
+validation_accuracy = accuracy_score(y_val_ros, model_ros.predict(X_val_ros))
+print('Validation Accuracy = %0.2f'% (validation_accuracy*100))
+
+#10 fold cross validation
+cv_scores = cross_val_score(model_ros, filled_transaction_df.drop(columns=['isFraud']), target, cv=10)
+print("Random Forests 10-Fold scores (After ROS) = ", cv_scores)
+print("Avg. Accuracy (of 10-FCV) = %0.2f (+/- %0.2f)"% (cv_scores.mean(), cv_scores.std()*2))
+
+print('\n---------------------------LOGISTIC REGRESSION (ROS)----------------------------')
+model_lr_ros = LogisticRegression(max_iter=150, solver='lbfgs')
+model_lr_ros.fit(X_train_ros, y_train_ros)
+lr_scores_ros = model_lr_ros.score(X_test, y_test)
+print("Logistic Regression Accuracy (After ROS) = %0.2f"% (lr_scores_ros*100))
+
+#Confusion Matrix
+y_predicted = model_lr_ros.predict(X_test)
+confuse_matrix_lr_ros = confusion_matrix(y_test, y_predicted)
+print("Logistic Regression Confusion Matrix: \n", confuse_matrix_lr_ros)
+
+#10 fold cross validation
+cv_scores = cross_val_score(model_lr_ros, filled_transaction_df.drop(columns=['isFraud']), target, cv=10)
+print("Log. Regression 10-Fold scores (After ROS) = ", cv_scores)
+print("Avg. Accuracy (of 10-FCV) = %0.2f (+/- %0.2f)"% (cv_scores.mean(), cv_scores.std()*2))
