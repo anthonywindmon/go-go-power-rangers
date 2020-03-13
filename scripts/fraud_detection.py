@@ -188,6 +188,16 @@ y_predicted = model.predict(X_test)
 confuse_matrix = confusion_matrix(y_test, y_predicted)
 print("Random Forests Confusion Matrix: \n", confuse_matrix)
 
+#training model accuracy
+training_accuarcy = accuracy_score(y_train, model.predict(X_train))
+print('Training Accuracy = %0.2f'% (training_accuarcy*100))
+#testing model accuracy
+testing_accuracy = accuracy_score(y_test,model.predict(X_test))
+print('Testing Accuracy = %0.2f'% (testing_accuracy*100))
+#validation model accuracy
+validation_accuracy = accuracy_score(y_val, model.predict(X_val))
+print('Validation Accuracy = %0.2f'% (validation_accuracy*100))
+
 #plot confusion matrix for Random Forests classifier
 fig = plt.figure()
 csfont = {'fontname':'Times New Roman'}
