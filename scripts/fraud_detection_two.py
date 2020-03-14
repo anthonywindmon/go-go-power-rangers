@@ -3,6 +3,10 @@
 
 #This is an extension of the work from the previous code
 #Here I will use different data science & machine learning techniques for the same 'fraud detection' dataset
+
+import warnings
+warnings.filterwarnings('ignore') #get rid of warnings
+
 import pandas as pd
 import seaborn as sn
 import matplotlib.pyplot as plt
