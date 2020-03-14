@@ -31,23 +31,10 @@ print('Shape of dataset: ',transaction_df.shape) #Number of features and samples
 print('\nUnique values per field:\n', transaction_df.nunique()) #shows number of unique values per feature
 print(transaction_df.info()) #shows other information about data: features with their data types, number values per feature, total amount of memory for this dataset, etc.
 
-#Shows uniques values for specific features -- I'm sure there's a more efficient way to do this (probably using a for/while/do loop)
+#Shows uniques values for specific features
 #This a method that can be used to see inside of datasets that too big to open manually
-print('\nUnique values in "acqCountry" feature:\n', transaction_df['acqCountry'].unique())
-print('\nUnique values in "cardPresent" feature:\n', transaction_df['cardPresent'].unique())
-print('\nUnique values in "creditLimit" feature:\n', transaction_df['creditLimit'].unique())
-print('\nUnique values in "currentExpDate" feature:\n', transaction_df['currentExpDate'].unique())
-print('\nUnique values in "expirationDateKeyInMatch" feature:\n', transaction_df['expirationDateKeyInMatch'].unique())
-print('\nUnique values in "merchantName" feature:\n', transaction_df['merchantName'].unique())
-print('\nUnique values in "merchantCategoryCode" feature:\n', transaction_df['merchantCategoryCode'].unique())
-print('\nUnique values in "merchantCountryCode" feature:\n', transaction_df['merchantCountryCode'].unique())
-print('\nUnique values in "posConditionCode" feature:\n', transaction_df['posConditionCode'].unique())
-print('\nUnique values in "posEntryMode" feature:\n', transaction_df['posEntryMode'].unique())
-print('\nUnique values in "customerId" feature:\n', transaction_df['customerId'].unique())
-print('\nUnique values in "transactionAmount" feature:\n', transaction_df['transactionAmount'].unique())
-print('\nUnique values in "transactionDateTime" feature:\n', transaction_df['transactionDateTime'].unique())
-print('\nUnique values in "transactionType" feature:\n', transaction_df['transactionType'].unique())
-print('\nUnique values in "accountOpenDate" feature:\n', transaction_df['accountOpenDate'].unique())
+for col in transaction_df:
+    print('\nUnique values in', col, ':', transaction_df[col].unique())
 
 #Manipulation of time series data
 print('\nTimes series data: \n', transaction_df['transactionDateTime'])
@@ -82,20 +69,13 @@ transaction_resample = transaction_df.resample('Q').sum().plot(kind='bar') #calc
 #print(transaction_resample)
 #plt.show()
 
-#Label Encoding of remaining features
-transaction_encoder = LabelEncoder()
-transaction_df['acqCountry'] = transaction_encoder.fit_transform(transaction_df['acqCountry'])
-transaction_df['accountOpenDate'] = transaction_encoder.fit_transform(transaction_df['accountOpenDate'])
-transaction_df['currentExpDate'] = transaction_encoder.fit_transform(transaction_df['currentExpDate'])
-transaction_df['dateOfLastAddressChange'] = transaction_encoder.fit_transform(transaction_df['dateOfLastAddressChange'])
-transaction_df['expirationDateKeyInMatch'] = transaction_encoder.fit_transform(transaction_df['expirationDateKeyInMatch'])
-transaction_df['isFraud'] = transaction_encoder.fit_transform(transaction_df['isFraud'])
-transaction_df['merchantCategoryCode'] = transaction_encoder.fit_transform(transaction_df['merchantCategoryCode'])
-transaction_df['merchantCountryCode'] = transaction_encoder.fit_transform(transaction_df['merchantCountryCode'])
-transaction_df['merchantName'] = transaction_encoder.fit_transform(transaction_df['merchantName'])
-transaction_df['posConditionCode'] = transaction_encoder.fit_transform(transaction_df['posConditionCode'])
-transaction_df['posEntryMode'] = transaction_encoder.fit_transform(transaction_df['posEntryMode'])
-transaction_df['transactionType'] = transaction_encoder.fit_transform(transaction_df['transactionType'])
+#Label Encoding of remaining features that are 'object' and 'boolean' types
+print('\nData is being encoded...')
+for col in transaction_df:
+    if transaction_df[col].dtype == object or bool:
+        transaction_df = transaction_df.apply(LabelEncoder().fit_transform)
+print('\n',transaction_df)
+print('\nAfter Encoding: ',transaction_df.head)
 
 #Finding correlation between feature 'transactionAmount' & target 'isFraud' features -- these features are highly correlated
 print('\nCORRELATION BETWEEN "transactionAmount" & "isFraud":' )
